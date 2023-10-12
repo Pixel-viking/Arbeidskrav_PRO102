@@ -34,9 +34,18 @@ let dmg = 0;
 // Random monster variables
 let monsterAperance = false;
 
+let chance = 0;
+
 let currentMonster = '';
 
 monster.style.display = 'none';
+
+// variabels that might change
+
+let bossDelay = 3000; //Defined to make it easier to balance the timing of attacks¨
+let arrowCount = 5; 
+let maxArrowCount = 5;
+let counter = 0;
 
 
 
@@ -72,7 +81,7 @@ monster.style.display = 'none';
 
     //Code for random apearance of monster
     function randomAparance() {
-        let chance = Math.floor(Math.random()*100) + 1;
+        chance = Math.floor(Math.random()*100) + 1;
         if (chance <= 12.5) {
             monster.src = 'images/bat.png';
             monster.style.display = 'block'
@@ -119,7 +128,7 @@ monster.style.display = 'none';
 
             output.innerHTML = `Nameles Knight angrep big boss for ${dmg}hp`;
 
-            bossAtack();
+            setTimeout(bossAtack, bossDelay);
 
             randomAparance();
             return
@@ -128,21 +137,28 @@ monster.style.display = 'none';
         
     }
 
+
     function juliaAttack() {
-        if (monsterAperance != true && currentBossHP > 50) {
+        if (arrowCount === 0) {
+            output.innerHTML = "Julia kan ikke angriipe hun er tom for piller";
+            return;
+        }
+        if (monsterAperance != true && currentBossHP > 50 && arrowCount != 0) {
             heroAttackBoss();
+
+            arrowCount -= 1;
 
             output.innerHTML = `Julia angrep big boss for ${dmg}hp`;
 
 
-            bossAtack();
+            setTimeout(bossAtack, bossDelay);
 
             randomAparance();
             return
         }
-        if (currentMonster != 'slime' && currentMonster != 'none') {
+        if (currentMonster != 'slime' && currentMonster != 'none' && arrowCount != 0) {
             heroMobAttack();
-            bossAtack();
+            setTimeout(bossAtack, bossDelay);
             return
         }
         output.innerHTML = 'Julia er usikker på om hun vil skyte den. Hva om den smaker godt?';
@@ -155,19 +171,32 @@ monster.style.display = 'none';
             output.innerHTML = `Cat angrep big boss for ${dmg}hp`;
 
 
-            bossAtack();
+            setTimeout(bossAtack, bossDelay);
 
             randomAparance();
             return
         }
         if (currentMonster != 'bat' && currentMonster != 'none') {
             heroMobAttack();
-            bossAtack();
+            setTimeout(bossAtack, bossDelay);
             return
         }
         output.innerHTML = 'Katten hopper og hopper, men når ikke opp til flaggermusen.'
         
     }
+
+
+    // Function that creates arrows for julia to use 
+    function createArrows() {
+        for (i = arrowCount; i < 5; i++) {
+            console.log("jack")
+            counter += 1;
+        }
+        arrowCount = i;
+        output.innerHTML = `Jack lagde ${counter} piler!`;
+        counter = 0;
+    }
+
 
     function StopDisplay(CreatureName) {
         CreatureName.style.display = "none";
@@ -176,3 +205,4 @@ monster.style.display = 'none';
     NknightShamalan.onclick = knightAttack;
     CrazyCat.onclick = catAttack;
     julia.onclick = juliaAttack;
+    treeMan.onclick = createArrows;
