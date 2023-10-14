@@ -158,3 +158,19 @@ img{
     left: 650px;
     bottom: 40px;
 }
+
+#gameOverScreen {
+    background-color: rgb(255, 0, 0);;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    flex-direction: column;
+    left: 0;
+    top: 0;
+    color: rgb(255, 255, 255);
+
+}
