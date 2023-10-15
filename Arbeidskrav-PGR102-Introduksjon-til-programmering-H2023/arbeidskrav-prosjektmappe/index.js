@@ -4,7 +4,7 @@
 const NknightShamalan = document.getElementById("nameless-knight");
 const julia = document.getElementById("julia-the-archer")
 const CrazyCat = document.getElementById("the-cat");
-const bigWilly = document.getElementById("william-the-healer");
+const wiliamTheHealer = document.getElementById("william-the-healer");
 const treeMan = document.getElementById("jack-the-lumberjack");
 
 const BossMan = document.getElementById("big-boss");
@@ -50,12 +50,12 @@ monster.style.display = 'none';
 
 // variabels that might change
 
-let bossDelay = 3000; //Defined to make it easier to balance the timing of attacks¨
+let bossDelay = 1500; //Defined to make it easier to balance the timing of attacks¨
 let arrowCount = 5; // This variable is to keep count of how many arrows are left.
 let maxArrowCount = 5;
-let counter = 0;
+let counter = 0; //Counter to be used to output how many arrows have been made by Jack
 
-let gameState = "running";
+let gameState = "running"; 
 
 
 
@@ -64,11 +64,13 @@ let gameState = "running";
         window.location.reload();
     }
 
+
+    //Checks if the player has won or lost and then displays the apropriate screen. 
     function checkGameState() {
         if (gameState === "Game Over") {
             gameOverScreen.style.display = "flex"
         }
-        if (gamestate === "Win") {
+        if (gameState === "Win") {
             gameOverScreen.style.background = "rgb(90, 180, 90)";
             gameEndText.innerHTML = "Du vant! <br> Vil du starte på nytt?"
             gameOverScreen.style.display = "flex"
@@ -87,7 +89,7 @@ let gameState = "running";
         }
     }
 
-    //Checks any of the heroes are dead when attacked. 
+    //Checks any of the heroes are dead after an attack. If they are they are replaced by a headstone. 
     function checkIfDead() {
         if (NkAlive === false) {
             output.innerHTML = "Nameles Knight Døde. De andre heltene kan ikke vinne uten han. <br> Big boss dreper de også";
@@ -107,8 +109,11 @@ let gameState = "running";
         if (catAlive === false) {
             output.innerHTML = "Cat døde!";
             CrazyCat.src = "images/headstone.png";
-            CrazyCat.style.width = "0px";
+            catHP.style.width = "0px";
             catAlive = 0;
+        }
+        if (currentBossHP <= 0) {
+            gameState = "Win"; 
         }
     }
 
@@ -118,7 +123,7 @@ let gameState = "running";
         let targetArr = Math.floor(Math.random() * characterArray.length);
         let target = characterArray[targetArr];
         //Used array to select target for the attack. Honsestly it would actually be one line less with code if I just used a random number, but I wanted to try.
-        let bossDMG = Math.floor(Math.random()*100);
+        let bossDMG = Math.floor(Math.random()*70);
         if (target === "NK") {
             currentNkHP -= bossDMG;
             NkHP.style.width = `${currentNkHP}px`;
@@ -137,16 +142,15 @@ let gameState = "running";
         }
         setStatusAsDead();
         checkIfDead();
-        checkGameState()
+        setTimeout(checkGameState, 1000); //Delay set so that the player gets to see the characters turn into gravestones if Namless knight dies.
     }
 
     //Code for random apearance of monster
     function randomAparance() {
-        chance = Math.floor(Math.random()*100) + 1;
+        chance = Math.floor(Math.random()*100);
         if (chance <= 12.5 && juliaAlive === true) {
             monster.src = 'images/bat.png';
             monster.style.display = 'block';
-            console.log("monster");
             monsterAperance = true;
             currentMonster = 'bat'; // To identify what the is monster. Used during hero restrictions.
             output.innerHTML = 'En flaggermus dukket opp!';
@@ -155,7 +159,6 @@ let gameState = "running";
         if (chance <= 25 && catAlive === true) {
             monster.src = 'images/slime.png';
             monster.style.display = 'block'
-            console.log("monster");
             monsterAperance = true;
             currentMonster = 'slime';
             output.innerHTML = 'En slime dukket opp!';
@@ -164,11 +167,10 @@ let gameState = "running";
 
     // Functions for the different attacks. So that the actual attack function is easier to read and to avoid nesting
     function heroAttackBoss() {
-        dmg = Math.floor(Math.random()*50);
         currentBossHP -= dmg;
         if (currentBossHP <= 0) {
             BossHP.style.width = "0px";
-            gamestate = "Win";
+            gameState = "Win";
         }
         else {
             BossHP.style.width = `${currentBossHP}px`;
@@ -185,6 +187,7 @@ let gameState = "running";
 
     // Function that defines what happens when one of the character that can attack are clicked. I used the width in pixels as the hp.
     function knightAttack() {
+        dmg = Math.floor(Math.random()*50);
 
         if (NkAlive != true) {
             output.innerHTML =  "Gravsteiner kan ikke angripe!";
@@ -208,6 +211,7 @@ let gameState = "running";
 
 
     function juliaAttack() {
+        dmg = Math.floor(Math.random()*50);
 
         if (juliaAlive != true) {
             output.innerHTML =  "Gravsteiner kan ikke angripe!";
@@ -218,7 +222,7 @@ let gameState = "running";
             output.innerHTML = "Julia kan ikke angriipe hun er tom for piller";
             return;
         }
-        if (monsterAperance != true && currentBossHP > 50 && arrowCount != 0) {
+        if (monsterAperance != true && dmg < currentBossHP && arrowCount != 0) {
             heroAttackBoss();
 
             arrowCount -= 1;
@@ -231,8 +235,9 @@ let gameState = "running";
             randomAparance();
             return
         }
-        if (currentMonster != 'slime' && currentMonster != 'none' && arrowCount != 0) {
+        if (currentMonster != 'slime' && currentMonster != 'none' && arrowCount != 0) { // Only posibility is when monster is bat.
             heroMobAttack();
+            output.innerHTML = "Julia drepte flaggermusen!";
             setTimeout(bossAtack, bossDelay);
             return
         }
@@ -240,15 +245,17 @@ let gameState = "running";
             output.innerHTML = 'Julia er usikker på om hun vil skyte den. Hva om den smaker godt?';
             return; 
         }
+            output.innerHTML = "Julia kan ikke drepe Big Boss"
     }
 
     function catAttack() {
+        dmg = Math.floor(Math.random()*50);
         if (catAlive != true) {
             output.innerHTML =  "Gravsteiner kan ikke angripe!";
             return;
 
         }
-        if (monsterAperance != true && currentBossHP > 50) {
+        if (monsterAperance != true && dmg < currentBossHP) {
             heroAttackBoss();
 
             output.innerHTML = `Cat angrep big boss for ${dmg}hp`;
@@ -264,7 +271,11 @@ let gameState = "running";
             setTimeout(bossAtack, bossDelay);
             return
         }
-        output.innerHTML = 'Katten hopper og hopper, men når ikke opp til flaggermusen.'
+        if (currentMonster != "none") {
+        output.innerHTML = 'Cat hopper og hopper, men når ikke opp til flaggermusen.';
+        return
+        }
+        output.innerHTML = "Cat kan ikke depe Big Boss."
         
     }
 
