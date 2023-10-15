@@ -268,6 +268,7 @@ let gameState = "running";
         }
         if (currentMonster != 'bat' && currentMonster != 'none') {
             heroMobAttack();
+            output.innerHTML = "Cat drepte Slim Monsteret";
             setTimeout(bossAtack, bossDelay);
             return
         }
@@ -291,6 +292,44 @@ let gameState = "running";
         counter = 0;
     }
 
+    function healAllies() { //Wiliam skal helbrede to ganger når han klikkes på
+        for (i = 0; i < 2; i++) {
+            let targetArr = Math.floor(Math.random()* characterArray.length);
+            let target = characterArray[targetArr]
+            if (target === "NK") {
+                currentNkHP += Math.floor(Math.random()*30) + 1;
+                console.log("Nk healed")
+                NkHP.style.width = `${currentNkHP}px`
+            }
+            if (target === "Julia") {
+                currentJuliaHP += Math.floor(Math.random()*30) + 1;
+                console.log("Julia healed")
+                juliaHP.style.width = `${currentJuliaHP}px`
+
+            }
+            if (target === "Cat") {
+                currentCatHP += Math.floor(Math.random()*30) + 1;
+                console.log("Cat Healed")
+                catHP.style.width = `${currentCatHP}px`
+            }
+        }
+        disableOverHeal()
+    }
+
+    function disableOverHeal() { //function to stop healing from going over the HPbar limit.
+        if (currentNkHP > 200) {
+            currentNkHP = 200;
+            NkHP.style.width = "200px"
+        }
+        if (currentJuliaHP > 200) {
+            currentJuliaHP = 200;
+            juliaHP.style.width = "200px"
+        }
+        if (currentCatHP > 200) {
+            currentCatHP = 200;
+            catHP.style.width = "200px"
+        }
+    }
 
 
     NknightShamalan.onclick = knightAttack;
@@ -298,3 +337,4 @@ let gameState = "running";
     julia.onclick = juliaAttack;
     treeMan.onclick = createArrows;
     restartButton.onclick = restartGame; 
+    wiliamTheHealer.onclick = healAllies;
