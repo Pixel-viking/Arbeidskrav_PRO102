@@ -11,9 +11,9 @@ const BossMan = document.getElementById("big-boss");
 var monster = document.getElementById("appearing-monster");
 
 let output = document.getElementById("output-text");
-const gameOverScreen = document.getElementById("gameOverScreen")
-const gameEndText = document.getElementById("gameOverText")
-const restartButton = document.getElementById("restartButton")
+const gameOverScreen = document.getElementById("gameOverScreen");
+const gameEndText = document.getElementById("gameOverText");
+const restartButton = document.getElementById("restartButton");
 
 const characterArray = ["NK", "Julia", "Cat"];
 
@@ -68,12 +68,12 @@ let gameState = "running";
     //Checks if the player has won or lost and then displays the apropriate screen. 
     function checkGameState() {
         if (gameState === "Game Over") {
-            gameOverScreen.style.display = "flex"
+            gameOverScreen.style.display = "flex";
         }
         if (gameState === "Win") {
             gameOverScreen.style.background = "rgb(90, 180, 90)";
-            gameEndText.innerHTML = "Du vant! <br> Vil du starte på nytt?"
-            gameOverScreen.style.display = "flex"
+            gameEndText.innerHTML = "Du vant! <br> Vil du starte på nytt?";
+            gameOverScreen.style.display = "flex";
         }
     }
 
@@ -97,7 +97,7 @@ let gameState = "running";
             juliaAlive = false;
             catAlive = false;
             juliaHP.style.width = "0px";
-            gameState = "Game Over"
+            gameState = "Game Over";
             NkAlive = 0;
         }
         if (juliaAlive === false) {
@@ -119,26 +119,33 @@ let gameState = "running";
 
 
     function bossAtack() {
-        //Boss selects target and attacks back
-        let targetArr = Math.floor(Math.random() * characterArray.length);
-        let target = characterArray[targetArr];
-        //Used array to select target for the attack. Honsestly it would actually be one line less with code if I just used a random number, but I wanted to try.
-        let bossDMG = Math.floor(Math.random()*70);
-        if (target === "NK") {
-            currentNkHP -= bossDMG;
-            NkHP.style.width = `${currentNkHP}px`;
-            output.innerHTML = `Boss angriper Namles Knight for ${bossDMG}hp`;
-        }
-        if (target === "Julia"){
-            currentJuliaHP -= bossDMG;
-            juliaHP.style.width = `${currentJuliaHP}px`;
-            output.innerHTML = `Boss angriper Julia for ${bossDMG}hp`;
-        }
-        if (target === "Cat") {
-            currentCatHP -= bossDMG;
-            catHP.style.width = `${currentCatHP}px`;
-            output.innerHTML = `Boss angriper Cat for ${bossDMG}hp`;
-            
+        let targetFound = false;
+        while (targetFound != true) { // While loop so that big boss does not select a target that is already dead. 
+            //Boss selects target and attacks back
+            let targetArr = Math.floor(Math.random() * characterArray.length);
+            let target = characterArray[targetArr];
+            //Used array to select target for the attack. Honsestly it would actually be one line less with code if I just used a random number, but I wanted to try.
+            let bossDMG = Math.floor(Math.random()*70);
+            if (target === "NK" && NkAlive != false) {
+                currentNkHP -= bossDMG;
+                NkHP.style.width = `${currentNkHP}px`;
+                output.innerHTML = `Boss angriper Namles Knight for ${bossDMG}hp`;
+                targetFound = true;
+                
+            }
+            if (target === "Julia" && juliaAlive != false){
+                currentJuliaHP -= bossDMG;
+                juliaHP.style.width = `${currentJuliaHP}px`;
+                output.innerHTML = `Boss angriper Julia for ${bossDMG}hp`;
+                targetFound = true; 
+            }
+            if (target === "Cat" && catAlive != false) {
+                currentCatHP -= bossDMG;
+                catHP.style.width = `${currentCatHP}px`;
+                output.innerHTML = `Boss angriper Cat for ${bossDMG}hp`;
+                targetFound = true;
+                
+            }
         }
         setStatusAsDead();
         checkIfDead();
@@ -154,7 +161,7 @@ let gameState = "running";
             monsterAperance = true;
             currentMonster = 'bat'; // To identify what the is monster. Used during hero restrictions.
             output.innerHTML = 'En flaggermus dukket opp!';
-            return
+            return;
         }
         if (chance <= 25 && catAlive === true) {
             monster.src = 'images/slime.png';
@@ -180,7 +187,7 @@ let gameState = "running";
     function heroMobAttack() {
         monsterAperance = false;
         monster.style.display = 'none';
-        currentMonster = 'none'
+        currentMonster = 'none';
 
     }
     
@@ -202,7 +209,7 @@ let gameState = "running";
             setTimeout(bossAtack, bossDelay);
 
             randomAparance();
-            return
+            return;
         }
         output.innerHTML = 'Knight nekter å angripe trash mobs';
 
@@ -233,19 +240,19 @@ let gameState = "running";
             setTimeout(bossAtack, bossDelay);
 
             randomAparance();
-            return
+            return;
         }
         if (currentMonster != 'slime' && currentMonster != 'none' && arrowCount != 0) { // Only posibility is when monster is bat.
             heroMobAttack();
             output.innerHTML = "Julia drepte flaggermusen!";
             setTimeout(bossAtack, bossDelay);
-            return
+            return;
         }
         if (currentMonster != 'none') {
             output.innerHTML = 'Julia er usikker på om hun vil skyte den. Hva om den smaker godt?';
             return; 
         }
-            output.innerHTML = "Julia kan ikke drepe Big Boss"
+            output.innerHTML = "Julia kan ikke drepe Big Boss";
     }
 
     function catAttack() {
@@ -264,19 +271,19 @@ let gameState = "running";
             setTimeout(bossAtack, bossDelay);
 
             randomAparance();
-            return
+            return;
         }
         if (currentMonster != 'bat' && currentMonster != 'none') {
             heroMobAttack();
             output.innerHTML = "Cat drepte Slim Monsteret";
             setTimeout(bossAtack, bossDelay);
-            return
+            return;
         }
         if (currentMonster != "none") {
         output.innerHTML = 'Cat hopper og hopper, men når ikke opp til flaggermusen.';
-        return
+        return;
         }
-        output.innerHTML = "Cat kan ikke depe Big Boss."
+        output.innerHTML = "Cat kan ikke depe Big Boss.";
         
     }
 
@@ -284,7 +291,7 @@ let gameState = "running";
     // Function that creates arrows for julia to use.
     function createArrows() {
         for (i = arrowCount; i < 5; i++) {
-            console.log("jack")
+            console.log("jack");
             counter += 1;
         }
         arrowCount = i;
@@ -295,22 +302,22 @@ let gameState = "running";
     function healAllies() { //Wiliam skal helbrede to ganger når han klikkes på
         for (i = 0; i < 2; i++) {
             let targetArr = Math.floor(Math.random()* characterArray.length);
-            let target = characterArray[targetArr]
+            let target = characterArray[targetArr];
             if (target === "NK") {
                 currentNkHP += Math.floor(Math.random()*30) + 1;
-                console.log("Nk healed")
-                NkHP.style.width = `${currentNkHP}px`
+                console.log("Nk healed");
+                NkHP.style.width = `${currentNkHP}px`;
             }
             if (target === "Julia") {
                 currentJuliaHP += Math.floor(Math.random()*30) + 1;
-                console.log("Julia healed")
-                juliaHP.style.width = `${currentJuliaHP}px`
+                console.log("Julia healed");
+                juliaHP.style.width = `${currentJuliaHP}px`;
 
             }
             if (target === "Cat") {
                 currentCatHP += Math.floor(Math.random()*30) + 1;
-                console.log("Cat Healed")
-                catHP.style.width = `${currentCatHP}px`
+                console.log("Cat Healed");
+                catHP.style.width = `${currentCatHP}px`;
             }
         }
         disableOverHeal()
@@ -319,15 +326,15 @@ let gameState = "running";
     function disableOverHeal() { //function to stop healing from going over the HPbar limit.
         if (currentNkHP > 200) {
             currentNkHP = 200;
-            NkHP.style.width = "200px"
+            NkHP.style.width = "200px";
         }
         if (currentJuliaHP > 200) {
             currentJuliaHP = 200;
-            juliaHP.style.width = "200px"
+            juliaHP.style.width = "200px";
         }
         if (currentCatHP > 200) {
             currentCatHP = 200;
-            catHP.style.width = "200px"
+            catHP.style.width = "200px";
         }
     }
 
