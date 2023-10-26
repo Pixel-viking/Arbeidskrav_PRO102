@@ -55,7 +55,7 @@ let gameState = "running";
 
 const characterArray = [ 
     /*
-    Here whenever this array reffers to 0 it will be Namless-Knight
+    Here whenever this array reffers to 0 it will be Namless-Knight's values
     1 will reffer to Julia
     2 will reffer to Cat  
     */
@@ -63,6 +63,9 @@ const characterArray = [
     {character: "Julia", isAlive: true, currentHP: 200, HPbar: juliaHP, image: julia},
     {character: "Cat", isAlive: true, currentHP: 200, HPbar: catHP, image: CrazyCat},
 ];
+let namelessKnightArrayID = 0;
+let JuliaArrID = 1;
+let catArrayID = 2; 
 
 const monsterArray = [
     {name: 'bat', source: 'images/bat.png'},
@@ -159,12 +162,18 @@ const monsterArray = [
         monster.style.display = 'block'
         monsterAperance = true;
         currentMonster = monsterArray[chance].name;
+        console.log(currentMonster)
         output.innerHTML = `En ${monsterArray[chance].name} dukket opp`;
         console.log(chance);
     }
 
     // Functions for the different attacks. So that the actual attack function is easier to read and to avoid nesting
-    function heroAttackBoss() {
+    function heroAttackBoss(attacker) {
+        //Julia arrow check
+        if (attacker === JuliaArrID && arrowCount === 0) {
+            output.innerHTML = "Julia kan ikke angriipe hun er tom for piller";
+            return;
+        }
         currentBossHP -= dmg;
         if (currentBossHP <= 0) {
             BossHP.style.width = "0px";
@@ -172,112 +181,57 @@ const monsterArray = [
         }
         else {
             BossHP.style.width = `${currentBossHP}px`;
+            output.innerHTML = `${characterArray[attacker].character} angrep big boss for ${dmg}hp`;
         }
+        setTimeout(bossAtack, bossDelay);
     }
     
-    function heroMobAttack() {
+    function heroMobAttack(attacker) {
+        // Namless Knight can't attack random monsters
+        if (attacker === namelessKnightArrayID) {
+            output.innerHTML = 'Knight nekter å angripe trash mobs';
+            return
+        }
+        // Stops cat from attacking bat, or anything that isn't a bat if I ever decide to add more monsters.
+        if (attacker === catArrayID && currentMonster != 'slime') {
+            output.innerHTML = 'Cat hopper og hopper, men når ikke opp til flaggermusen.';
+            return;
+        }
+        //Stops julia from attacking slime
+        if (attacker === JuliaArrID && currentMonster != 'bat') {
+            output.innerHTML = 'Julia er usikker på om hun vil skyte den. Hva om den smaker godt?';
+            return;
+        }
+        //If the attack goes thorugh: 
         monsterAperance = false;
         monster.style.display = 'none';
+        output.innerHTML = `${characterArray[attacker].character} drepte ${currentMonster}`;
         currentMonster = 'none';
+        setTimeout(bossAtack, bossDelay);
 
     }
     
-
-    // Function that defines what happens when one of the character that can attack are clicked. I used the width in pixels as the hp.
-    function knightAttack() {
-        dmg = Math.floor(Math.random()*50);
-
-        if (characterArray[0].isAlive != true) {
+    function heroesAttack(characterNum) {
+        dmg = Math.floor(Math.random()*50)
+        if (characterArray[characterNum].isAlive != true) { // Checkes if the attacking character is dead. If it is then it can't attack
             output.innerHTML =  "Gravsteiner kan ikke angripe!";
             return;
-
+        }
+        if (characterArray[characterNum].character != "Namless Knight" && dmg > currentBossHP) {
+            //Nameless knight is the only one who can kill big boss. This stops it from happening
+            output.innerHTML = `${characterArray[characterNum].character} kan ikke drepe big boss!`;
+            return;
         }
         if (monsterAperance != true) {
-            heroAttackBoss();
-
-            output.innerHTML = `Nameles Knight angrep big boss for ${dmg}hp`;
-
-            setTimeout(bossAtack, bossDelay);
+            heroAttackBoss(characterNum);
 
             randomAparance();
             return;
         }
-        output.innerHTML = 'Knight nekter å angripe trash mobs';
+        heroMobAttack(characterNum); 
 
-        
+
     }
-
-
-    function juliaAttack() {
-        dmg = Math.floor(Math.random()*50);
-
-        if (characterArray[1].isAlive != true) {
-            output.innerHTML =  "Gravsteiner kan ikke angripe!";
-            return;
-
-        }
-        if (arrowCount === 0) {
-            output.innerHTML = "Julia kan ikke angriipe hun er tom for piller";
-            return;
-        }
-        if (monsterAperance != true && dmg < currentBossHP && arrowCount != 0) {
-            heroAttackBoss();
-
-            arrowCount -= 1;
-
-            output.innerHTML = `Julia angrep big boss for ${dmg}hp`;
-
-
-            setTimeout(bossAtack, bossDelay);
-
-            randomAparance();
-            return;
-        }
-        if (currentMonster != 'slime' && currentMonster != 'none' && arrowCount != 0) { // Only posibility is when monster is bat.
-            heroMobAttack();
-            output.innerHTML = "Julia drepte flaggermusen!";
-            setTimeout(bossAtack, bossDelay);
-            return;
-        }
-        if (currentMonster != 'none') {
-            output.innerHTML = 'Julia er usikker på om hun vil skyte den. Hva om den smaker godt?';
-            return; 
-        }
-            output.innerHTML = "Julia kan ikke drepe Big Boss";
-    }
-
-    function catAttack() {
-        dmg = Math.floor(Math.random()*50);
-        if (characterArray[2].isAlive != true) {
-            output.innerHTML =  "Gravsteiner kan ikke angripe!";
-            return;
-
-        }
-        if (monsterAperance != true && dmg < currentBossHP) {
-            heroAttackBoss();
-
-            output.innerHTML = `Cat angrep big boss for ${dmg}hp`;
-
-
-            setTimeout(bossAtack, bossDelay);
-
-            randomAparance();
-            return;
-        }
-        if (currentMonster != 'bat' && currentMonster != 'none') {
-            heroMobAttack();
-            output.innerHTML = "Cat drepte Slim Monsteret";
-            setTimeout(bossAtack, bossDelay);
-            return;
-        }
-        if (currentMonster != "none") {
-        output.innerHTML = 'Cat hopper og hopper, men når ikke opp til flaggermusen.';
-        return;
-        }
-        output.innerHTML = "Cat kan ikke depe Big Boss.";
-        
-    }
-
 
     // Function that creates arrows for julia to use.
     function createArrows() {
@@ -310,10 +264,19 @@ const monsterArray = [
         }
     }
 
+    function namlessKnightClicked() {
+        heroesAttack(namelessKnightArrayID)
+    }
+    function juliaClicked() {
+        heroesAttack(JuliaArrID)
+    }
+    function catClicked() {
+        heroesAttack(catArrayID);
+    }
 
-    NknightShamalan.onclick = knightAttack;
-    CrazyCat.onclick = catAttack;
-    julia.onclick = juliaAttack;
+    NknightShamalan.onclick = namlessKnightClicked;
+    CrazyCat.onclick = catClicked;
+    julia.onclick = juliaClicked;
     treeMan.onclick = createArrows;
     restartButton.onclick = restartGame; 
     wiliamTheHealer.onclick = healAllies;
