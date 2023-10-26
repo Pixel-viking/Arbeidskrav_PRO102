@@ -14,8 +14,7 @@ let output = document.getElementById("output-text");
 const gameOverScreen = document.getElementById("gameOverScreen");
 const gameEndText = document.getElementById("gameOverText");
 const restartButton = document.getElementById("restartButton");
-
-const characterArray = ["NK", "Julia", "Cat"];
+ 
 
 /*
     HP bars, How much HP is left and if anyone has died
@@ -23,18 +22,15 @@ const characterArray = ["NK", "Julia", "Cat"];
 
 let NkHP = document.getElementById("nameless-knight-hp-div");
 let currentNkHP = 200;
-let NkAlive = true;
 
 let juliaHP = document.getElementById("julia-the-archer-hp-div");
 let currentJuliaHP = 200;
-let juliaAlive = true;
 
 let catHP = document.getElementById("the-cat-hp-div");
 let currentCatHP = 200;
 
 let BossHP = document.getElementById("big-boss-hp-div");
 let currentBossHP = 300;
-let catAlive = true;
 
 let dmg = 0;
 
@@ -48,8 +44,6 @@ let currentMonster = '';
 
 monster.style.display = 'none';
 
-let monsterDelay = 1000;
-
 // variabels that might change
 
 let bossDelay = 1500; //Defined to make it easier to balance the timing of attacks¨
@@ -59,6 +53,27 @@ let counter = 0; //Counter to be used to output how many arrows have been made b
 
 let gameState = "running"; 
 
+const characterArray = [ 
+    /*
+    Here whenever this array reffers to 0 it will be Namless-Knight
+    1 will reffer to Julia
+    2 will reffer to Cat  
+    */
+    {character: "Namless Knight", isAlive: true, currentHP: 200, HPbar: NkHP, image: NknightShamalan},
+    {character: "Julia", isAlive: true, currentHP: 200, HPbar: juliaHP, image: julia},
+    {character: "Cat", isAlive: true, currentHP: 200, HPbar: catHP, image: CrazyCat},
+];
+
+const monsterArray = [
+    {name: 'bat', source: 'images/bat.png'},
+    {name: 'slime', source:'images/slime.png'},
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+] //array form monstre og deres bilde resursrer. Dette brukes også for sjangsen for at et monster dukker opp
 
 
 
@@ -79,43 +94,37 @@ let gameState = "running";
         }
     }
 
-    function setStatusAsDead() {
-        if (currentNkHP <= 0 && NkAlive === true) {
-            NkAlive = false;
-        }
-        if (currentJuliaHP <= 0 && juliaAlive === true) {
-            juliaAlive = false;
-        }
-        if (currentCatHP <= 0 && catAlive === true) {
-            catAlive = false;
+    function setStatusAsDead() {  
+        // Loops through the character array in order to check if any of the heroes are dead and then sets their isAlive value as false.  
+        for (let i = 0; i < 3; i++) {
+            if (characterArray[i].currentHP <= 0 && characterArray[i].isAlive === true) {
+                characterArray[i].isAlive = false;
+                console.log(i)
+            }
         }
     }
 
     //Checks any of the heroes are dead after an attack. If they are they are replaced by a headstone. 
     function checkIfDead() {
-        if (NkAlive === false) {
-            output.innerHTML = "Nameles Knight Døde. De andre heltene kan ikke vinne uten han. <br> Big boss dreper de også";
-            NknightShamalan.src = "images/headstone.png";
-            juliaAlive = false;
-            catAlive = false;
-            juliaHP.style.width = "0px";
+        if (characterArray[0].isAlive === false) { // I made a special case for Namless-Knight is dead since the game can't continue without him. 
+            output.innerHTML = 'Nameless Knigh er død uten han kan ikke de andre heltene vinne! Du taper';
+            characterArray[0].HPbar.style.width = '0px'; // This is here to stop the HP-bar from gettiing stuck if it reacehs less than zero
+            characterArray[1].HPbar.style.width = '0px'; 
+            characterArray[2].HPbar.style.width = '0px';
+            characterArray[1].isAlive = false;
+            characterArray[2].isAlive = false; 
             gameState = "Game Over";
-            NkAlive = 0;
+            return; 
         }
-        if (juliaAlive === false) {
-            output.innerHTML = "Julia døde!";
-            julia.src = "images/headstone.png";
-            juliaHP.style.width = "0px";
-            juliaAlive = 0;
-        }
-        if (catAlive === false) {
-            output.innerHTML = "Cat døde!";
-            CrazyCat.src = "images/headstone.png";
-            catHP.style.width = "0px";
-            catAlive = 0;
-        }
-        if (currentBossHP <= 0) {
-            gameState = "Win"; 
+        //Beneath is for  the other two heroes since there is no real difference between their deaths
+        for (let i = 1; i < 3; i++) {
+            if (characterArray[i].isAlive === false) {
+                output.innerHTML = `${characterArray[i].character} er død!!`;
+                characterArray[i].image.src = "images/headstone.png"; 
+                characterArray[i].HPbar.style.width = '0px';
+                console.log("hei");
+            }
+
         }
     }
 
@@ -124,29 +133,14 @@ let gameState = "running";
         let targetFound = false;
         while (targetFound != true) { // While loop so that big boss does not select a target that is already dead. 
             //Boss selects target and attacks back
-            let targetArr = Math.floor(Math.random() * characterArray.length);
-            let target = characterArray[targetArr];
-            //Used array to select target for the attack. Honsestly it would actually be one line less with code if I just used a random number, but I wanted to try.
+            let targetArr = Math.floor(Math.random() * characterArray.length); //Selects one of the values in the array in order to find a target.
             let bossDMG = Math.floor(Math.random()*70);
-            if (target === "NK" && NkAlive != false) {
-                currentNkHP -= bossDMG;
-                NkHP.style.width = `${currentNkHP}px`;
-                output.innerHTML = `Boss angriper Namles Knight for ${bossDMG}hp`;
-                targetFound = true;
-                
-            }
-            if (target === "Julia" && juliaAlive != false){
-                currentJuliaHP -= bossDMG;
-                juliaHP.style.width = `${currentJuliaHP}px`;
-                output.innerHTML = `Boss angriper Julia for ${bossDMG}hp`;
+
+            if (characterArray[targetArr].isAlive != false) {
+                characterArray[targetArr].currentHP -= bossDMG;
+                characterArray[targetArr].HPbar.style.width = `${characterArray[targetArr].currentHP}px`
+                output.innerHTML = `Boss angriper ${characterArray[targetArr].character} for ${bossDMG}hp`;
                 targetFound = true; 
-            }
-            if (target === "Cat" && catAlive != false) {
-                currentCatHP -= bossDMG;
-                catHP.style.width = `${currentCatHP}px`;
-                output.innerHTML = `Boss angriper Cat for ${bossDMG}hp`;
-                targetFound = true;
-                
             }
         }
         setStatusAsDead();
@@ -156,22 +150,17 @@ let gameState = "running";
 
     //Code for random apearance of monster
     function randomAparance() {
-        chance = Math.floor(Math.random()*100);
-        if (chance <= 12.5 && juliaAlive === true) {
-            monster.src = 'images/bat.png';
-            monster.style.display = 'block';
-            monsterAperance = true;
-            currentMonster = 'bat'; // To identify what the is monster. Used during hero restrictions.
-            output.innerHTML = 'En flaggermus dukket opp!';
+        chance = Math.floor(Math.random()*monsterArray.length);
+        if (chance != (0 || 1)) {
+            console.log(chance);
             return;
         }
-        if (chance <= 25 && catAlive === true) {
-            monster.src = 'images/slime.png';
-            monster.style.display = 'block'
-            monsterAperance = true;
-            currentMonster = 'slime';
-            output.innerHTML = 'En slime dukket opp!';
-        }
+        monster.src = monsterArray[chance].source;
+        monster.style.display = 'block'
+        monsterAperance = true;
+        currentMonster = monsterArray[chance].name;
+        output.innerHTML = `En ${monsterArray[chance].name} dukket opp`;
+        console.log(chance);
     }
 
     // Functions for the different attacks. So that the actual attack function is easier to read and to avoid nesting
@@ -185,7 +174,7 @@ let gameState = "running";
             BossHP.style.width = `${currentBossHP}px`;
         }
     }
-
+    
     function heroMobAttack() {
         monsterAperance = false;
         monster.style.display = 'none';
@@ -198,7 +187,7 @@ let gameState = "running";
     function knightAttack() {
         dmg = Math.floor(Math.random()*50);
 
-        if (NkAlive != true) {
+        if (characterArray[0].isAlive != true) {
             output.innerHTML =  "Gravsteiner kan ikke angripe!";
             return;
 
@@ -210,7 +199,7 @@ let gameState = "running";
 
             setTimeout(bossAtack, bossDelay);
 
-            setTimeout(randomAparance, monsterDelay);
+            randomAparance();
             return;
         }
         output.innerHTML = 'Knight nekter å angripe trash mobs';
@@ -222,7 +211,7 @@ let gameState = "running";
     function juliaAttack() {
         dmg = Math.floor(Math.random()*50);
 
-        if (juliaAlive != true) {
+        if (characterArray[1].isAlive != true) {
             output.innerHTML =  "Gravsteiner kan ikke angripe!";
             return;
 
@@ -241,7 +230,7 @@ let gameState = "running";
 
             setTimeout(bossAtack, bossDelay);
 
-            setTimeout(randomAparance, monsterDelay);
+            randomAparance();
             return;
         }
         if (currentMonster != 'slime' && currentMonster != 'none' && arrowCount != 0) { // Only posibility is when monster is bat.
@@ -259,7 +248,7 @@ let gameState = "running";
 
     function catAttack() {
         dmg = Math.floor(Math.random()*50);
-        if (catAlive != true) {
+        if (characterArray[2].isAlive != true) {
             output.innerHTML =  "Gravsteiner kan ikke angripe!";
             return;
 
@@ -272,7 +261,7 @@ let gameState = "running";
 
             setTimeout(bossAtack, bossDelay);
 
-            setTimeout(randomAparance, monsterDelay);
+            randomAparance();
             return;
         }
         if (currentMonster != 'bat' && currentMonster != 'none') {
@@ -304,39 +293,20 @@ let gameState = "running";
     function healAllies() { //Wiliam skal helbrede to ganger når han klikkes på
         for (i = 0; i < 2; i++) {
             let targetArr = Math.floor(Math.random()* characterArray.length);
-            let target = characterArray[targetArr];
-            if (target === "NK") {
-                currentNkHP += Math.floor(Math.random()*30) + 1;
-                console.log("Nk healed");
-                NkHP.style.width = `${currentNkHP}px`;
-            }
-            if (target === "Julia") {
-                currentJuliaHP += Math.floor(Math.random()*30) + 1;
-                console.log("Julia healed");
-                juliaHP.style.width = `${currentJuliaHP}px`;
 
-            }
-            if (target === "Cat") {
-                currentCatHP += Math.floor(Math.random()*30) + 1;
-                console.log("Cat Healed");
-                catHP.style.width = `${currentCatHP}px`;
-            }
+            characterArray[targetArr].currentHP += Math.floor(Math.random()*30) + 1;
+            console.log(characterArray[targetArr].character);
+            characterArray[targetArr].HPbar.style.width = `${characterArray[targetArr].currentHP}px`;
         }
         disableOverHeal()
     }
 
     function disableOverHeal() { //function to stop healing from going over the HPbar limit.
-        if (currentNkHP > 200) {
-            currentNkHP = 200;
-            NkHP.style.width = "200px";
-        }
-        if (currentJuliaHP > 200) {
-            currentJuliaHP = 200;
-            juliaHP.style.width = "200px";
-        }
-        if (currentCatHP > 200) {
-            currentCatHP = 200;
-            catHP.style.width = "200px";
+        for (let i = 0; i < 3; i++) {
+            if (characterArray[i].currentHP > 200) {
+                characterArray[i].currentHP = 200;
+                characterArray[i].HPbar.style.width = '200px';
+            }
         }
     }
 
